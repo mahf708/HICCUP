@@ -1431,7 +1431,9 @@ class hiccup_data(object):
             ds.to_netcdf(file_name)
             ds.close()
             # reset file format since xarray will automatically convert to netcdf4
-            cmd = f'ncks -O --fl_fmt={ncremap_file_fmt} {file_name} {file_name} '
+            cmd = f'ncks -O --fl_fmt={ncremap_file_fmt} {file_name} new_{file_name} '
+            run_cmd(cmd,verbose,prepend_line=False)
+            cmd = f'mv new_{file_name} {file_name}'
             run_cmd(cmd,verbose,prepend_line=False)
 
         # Remove the attributes listed in global_att_list using ncatted

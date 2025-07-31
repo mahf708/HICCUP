@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --constraint=cpu
-#SBATCH --account=m3312
+#SBATCH --account=e3sm
 #SBATCH --qos=regular
-#SBATCH --time=8:00:00
+#SBATCH --time=48:00:00
 #SBATCH --nodes=1
-#SBATCH --mail-user=hannah6@llnl.gov
+#SBATCH --mail-user=$USER@NERSC.GOV
 #SBATCH --mail-type=END,FAIL
 
 # To run this batch script, use the command below 
@@ -17,14 +17,14 @@
 
 
 # Load the python environment
-source activate hiccup_env
+micromamba activate xgns
 
 
 # VGRID=L120
 # time python -u ./create_initial_condition.py --init_date=2008-10-01 --vgrid=$VGRID
 
 # sbatch template_scripts/run_hiccup_batch.nersc.sh
-time python -u test_scripts/ > hiccup.test.ATM_from_ERA5.out
+time python /global/homes/m/mahf708/HICCUP/template_hiccup_scripts/create_EAMxx_IC_from_ERA5-NOAA.py
 
 # Notes:
 # "time" is used here to print the execution time to the end of log file.

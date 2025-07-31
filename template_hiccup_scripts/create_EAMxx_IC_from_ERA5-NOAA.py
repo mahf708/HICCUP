@@ -16,31 +16,36 @@ do_sfc_adjust   = True    # perform surface T and P adjustments
 remap_data_vert = True    # vertical remap
 do_state_adjust = True    # post vertical interpolation adjustments
 combine_files   = True    # combine temporary data files and delete
-# create_sst_data = True    # sst/sea ice file creation
+create_sst_data = True    # sst/sea ice file creation
 # ------------------------------------------------------------------------------
 
 # local path for grid and mapping files (move this a scratch space for large grids)
 hiccup_root = os.getenv('HOME')+'/HICCUP'
 
 # Specify output atmosphere horizontal grid
-dst_horz_grid = 'ne30np4'
+dst_horz_grid = 'ne1024np4'
 
 # Specify output atmosphere vertical grid
 dst_vert_grid,vert_file_name = 'L128',f'{hiccup_root}/files_vert/vert_coord_E3SM_L128.nc'
 
 # specify date of data (and separately specify year for SST/ice files)
-init_date = '2008-10-01'
+init_date = '2021-08-15'
 init_year = int(init_date.split('-')[0])
 
 # Specify output file names
-data_root = f'{hiccup_root}/data_scratch'
-output_atm_file_name = f'{data_root}/HICCUP.atm_era5.{init_date}.{dst_horz_grid}.{dst_vert_grid}.nc'
+data_root = f'/pscratch/sd/m/mahf708/hiccup/data_scratch'
+topo_mod = f'6x'
+output_atm_file_name = f'{data_root}/HICCUP.atm_era5.{init_date}.{dst_horz_grid}.{dst_vert_grid}.topo-{topo_mod}.nc'
 output_sst_file_name = f'{data_root}/HICCUP.sst_noaa.{init_date}.nc'
 
 # set topo file - replace this with file path if no defalt is set
 # topo_file_name = hiccup.get_default_topo_file_name(dst_horz_grid)
-topo_file_name = 'test_data/USGS-gtopo30_ne30np4_16xdel2-PFC-consistentSGH.nc'
-
+if topo_mod == '16x':
+    topo_file_name = '/global/cfs/cdirs/e3sm/inputdata/atm/cam/topo/USGS-gtopo30_ne1024np4_16xconsistentSGH_20190528.nc'
+elif topo_mod == '6x':
+    topo_file_name = '/global/cfs/cdirs/e3sm/inputdata/atm/cam/topo/USGS-gtopo30_ne1024np4pg2_x6t-SGH.c20210614.nc'
+else:
+    raise ValueError(f'Unknown topo_mod: {topo_mod}. Must be "16x" or "6x".')
 # Create data class instance, which includes xarray file dataset objects
 # and variable name dictionaries for mapping between naming conventions.
 # This also checks input files for required variables
@@ -48,8 +53,8 @@ hiccup_data = hiccup.create_hiccup_data(src_data_name='ERA5',
                                         target_model='EAMXX',
                                         dst_horz_grid=dst_horz_grid,
                                         dst_vert_grid=dst_vert_grid,
-                                        atm_file=f'{data_root}/ERA5.atm.{init_date}.nc',
-                                        sfc_file=f'{data_root}/ERA5.sfc.{init_date}.nc',
+                                        atm_file=f'{data_root}/ERA5.atm.{init_date}.00.nc',
+                                        sfc_file=f'{data_root}/ERA5.sfc.{init_date}.00.nc',
                                         sstice_name='NOAA',
                                         sst_file=f'{data_root}/sst.day.mean.{init_year}.nc',
                                         ice_file=f'{data_root}/icec.day.mean.{init_year}.nc',
@@ -141,7 +146,7 @@ if combine_files :
                               output_file_name=output_atm_file_name)
 
     # Clean up the global attributes of the file
-    hiccup_data.clean_global_attributes(file_name=output_atm_file_name)
+    # hiccup_data.clean_global_attributes(file_name=output_atm_file_name)
 
 # ------------------------------------------------------------------------------
 # Create SST/sea ice file
